@@ -20,7 +20,7 @@ export default class Login extends Component {
     localStorage.setItem(firebaseAuthKey, '1');
   }
 
-  componentWilMount() {
+  componentWillMount() {
     if (localStorage.getItem(appTokenKey)) {
       this.props.history.push('/app/home');
       return;

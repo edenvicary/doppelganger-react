@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import { Col, Grid, Image, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { logout } from '../helpers/auth';
+
+const appTokenKey = "appToken";
 
 export default class Home extends Component {
   constructor(props) {
@@ -19,9 +22,18 @@ export default class Home extends Component {
         url: 'http://fillmurray.com/200/200'
       }
     ];
+    this.handleLogout = this.handleLogout.bind(this);
     this.state = {
       images
     };
+  }
+
+  handleLogout() {
+    logout()
+    .then(() => {
+      localStorage.removeItem(appTokenKey);
+      this.props.history.push("/login");
+    });
   }
 
   render() {
@@ -47,7 +59,7 @@ export default class Home extends Component {
             <Col xs={4} className="col-bottom">
               <i className="bottom-icon material-icons">camera_alt</i>
             </Col>
-            <Col xs={4} className="col-bottom">
+            <Col onClick={this.handleLogout} xs={4} className="col-bottom">
               <i className="bottom-icon material-icons">assignment_return</i>
             </Col>
           </Row>
