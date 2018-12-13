@@ -2,13 +2,41 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const vision = require('@google-cloud/vision');
 const visionClient = new vision.ImageAnnatotorClient();
-let promise = require('promise');
+let Promise = require('promise');
 admin.initializeApp(functions.config().firebase);
 const db = admin.firestore();
 
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase!");
-// });
+exports.addSimilarImages = functions.firestore.document('photos/{document}')
+  .onCreate((snap, context) => {
+    console.log('SNAP', snap);
+    console.log('CONTEXT', context);
+
+    const data = snap.data();
+    console.log('DATA IS IN', data);
+    const photoUrl = "gs://" + data.bucket + "/" + data.fullPath;
+    console.log('url is', photoUrl);
+
+    return Promise.resolve()
+      .then(() => {
+        return visionClient.webDetection(photoUrl);
+      })
+      .then(results => {
+        console.log('VISION data all is: ', results);
+        const webDetection = results[0].webDetection
+
+        let similarImages = [];
+        if (webDetection.visuallySimilarImages.length) {
+          webDetection.visuallySimilarImages.forEach(image => {
+            similarImages.push(image);
+          });
+        }
+
+        console.log('similarImages', similarImages);
+        db.collection('photos')
+          .doc(context.params.document)
+          .update({ similarImages })
+          .then(res  => console.log('dopples added'))
+          .catch(error => console.error(error));
+      })
+      .catch(error => console.error(error));
+  });
