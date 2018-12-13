@@ -1,7 +1,7 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const vision = require('@google-cloud/vision');
-const visionClient = new vision.ImageAnnatotorClient();
+const visionClient = new vision.ImageAnnotatorClient();
 let Promise = require('promise');
 admin.initializeApp(functions.config().firebase);
 const db = admin.firestore();
