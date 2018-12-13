@@ -10,24 +10,32 @@ const appTokenKey = "appToken";
 export default class Home extends Component {
   constructor(props) {
     super(props);
-    const allPhotos = [
-      {
-        id: 'placeholder_1',
-        url: 'http://fillmurray.com/200/200'
-      },
-      {
-        id: 'placeholder_2',
-        url: 'http://fillmurray.com/200/200'
-      },
-      {
-        id: 'placeholder_3',
-        url: 'http://fillmurray.com/200/200'
-      }
-    ];
     this.handleLogout = this.handleLogout.bind(this);
+    this.getInitial = this.getInitial.bind(this);
     this.state = {
-      allPhotos
+      allPhotos: []
     };
+  }
+
+  componentDidMount() {
+    this.getInitial();
+  }
+
+  getInitial() {
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        firebase.firestore().collection('photos').onSnapshot(snapshot => {
+          let allPhotos = [];
+          snapshot.forEach(doc => {
+            var newItem = doc.data();
+            newItem.id = doc.id;
+            allPhotos.push(newItem);
+          });
+          allPhotos.reverse();
+          this.setState({ allPhotos });
+        });
+      }
+    });
   }
 
   handleLogout() {
